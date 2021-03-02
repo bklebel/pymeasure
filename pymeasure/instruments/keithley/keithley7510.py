@@ -1,7 +1,7 @@
 #
 # This file is part of the PyMeasure package.
 #
-# Copyright (c) 2013-2021 PyMeasure Developers
+# Copyright (c) 2013-2020 PyMeasure Developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+import logging
 
-from .keithley2000 import Keithley2000
-from .keithley2260B import Keithley2260B
-from .keithley2400 import Keithley2400
-from .keithley2450 import Keithley2450
-from .keithley2700 import Keithley2700
-from .keithley6221 import Keithley6221
-from .keithley2750 import Keithley2750
-from .keithley6517b import Keithley6517B
-from .keithley7510 import Keithley7510
+
+from pymeasure.instruments import Instrument
+from pymeasure.instruments.validators import truncated_range, strict_discrete_set
+
+# from .buffer import KeithleyBuffer
+
+# import numpy as np
+# import time
+# from io import BytesIO
+# import re
+
+log = logging.getLogger(__name__)
+# log.addHandler(logging.NullHandler())
+
+
+class Keithley7510(Instrument):
+    """ Represents the Keithley 7510 Multimeter and provides a high-level
+    interface for interacting with the instrument.
+
+    .. code-block:: python
+
+        meter = Keithley7510("GPIB::1")
+        meter.measure_voltage()
+        print(meter.voltage)
+    """
+    def __init__(self, adapter, **kwargs):
+        super().__init__(
+            adapter, "Keithley 7510 Multimeter", **kwargs
+        )
