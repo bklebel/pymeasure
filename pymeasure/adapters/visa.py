@@ -26,6 +26,7 @@ import logging
 
 import copy
 import pyvisa
+from pyvisa.errors import VisaIOError
 import numpy as np
 from pkg_resources import parse_version
 
@@ -160,9 +161,49 @@ class VISAAdapter(Adapter):
 
 class RetryingVISAAdapter(VISAAdapter):
     """docstring for RetryingVisaAdapter"""
-    def __init__(self, *args, **kwargs):
+    def __init__(self, sanity, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.arg = arg
-        
+        self.sanity_regex = sanity
+
     def ask(self, command):
-        pass
+        """ Write the command to the instrument and return the resulting
+        ASCII response
+        Do a sanity check for the returned value, if this fails recursively
+        repeat
+
+        :param command: SCPI command string to be sent to the instrument
+        :returns: String ASCII response of the instrument
+        """
+        value = self.connection.query(command)
+
+        try:
+            if False:  # TODO: regex here, using self.sanity_regex
+                try:
+                    self.read()
+                except VisaIOError as e_visa:
+                    if (
+                        isinstance(e_visa, type(self.timeouterror))
+                        and e_visa.args == self.timeouterror.args
+                    ):
+                        pass
+                    else:
+                        raise e_visa
+                return self.ask(command)
+        except TypeError:
+            try:
+                self.read()
+            except VisaIOError as e_visa:
+                if (
+                    isinstance(e_visa, type(self.timeouterror))
+                    and e_visa.args == self.timeouterror.args
+                ):
+                    pass
+                else:
+                    raise e_visa
+            return self.ask(command)
+        # return float(value.strip("R+"))
+        return value
+
+
+
+
